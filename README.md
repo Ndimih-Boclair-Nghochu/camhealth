@@ -30,6 +30,17 @@ Protection.
 A small clinic can run everything on a single PC; a larger hospital runs an on-site server on
 the LAN with all desktops connecting to it, and the server syncs to the cloud.
 
+### Sync
+
+Records use UUID keys and an `updated_at` column. The on-site server mirrors to the cloud via:
+
+- `GET /api/sync/pull/?since=<iso>` — changes + deletions since a time
+- `POST /api/sync/push/` — apply a batch of `{changes, deletions}` (last-write-wins)
+- `python manage.py sync_to_cloud` — pulls then pushes (set `CLOUD_API_BASE` + `CLOUD_SYNC_TOKEN`)
+
+Deletes propagate through tombstones. Re-applying an identical row is a no-op, which prevents
+pull/push ping-pong.
+
 ## Phase roadmap
 
 - **Phase 1 (in progress)** — patient records + QR ID, consultation notes, e-prescription,
