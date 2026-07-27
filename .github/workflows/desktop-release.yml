@@ -1,0 +1,27 @@
+name: desktop-release
+
+# Builds the Electron desktop app. On a version tag it also publishes installers.
+on:
+  push:
+    branches: [main]
+    paths: ["desktop/**", "shared/**", ".github/workflows/desktop-release.yml"]
+    tags: ["desktop-v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+      - name: Type-check & build renderer
+        run: npm run build
+      # - name: Package installer (on tag)
+      #   if: startsWith(github.ref, 'refs/tags/desktop-v')
+      #   run: npm run dist

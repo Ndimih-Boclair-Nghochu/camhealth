@@ -1,0 +1,37 @@
+# ---- Node / JS ----
+node_modules/
+dist/
+build/
+out/
+.next/
+.expo/
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+.turbo/
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.sqlite3
+db.sqlite3
+staticfiles/
+media/
+
+# ---- Env & secrets ----
+.env
+.env.*
+!.env.example
+
+# ---- Electron build ----
+desktop/release/
+desktop/dist-electron/
+
+# ---- OS / editor ----
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

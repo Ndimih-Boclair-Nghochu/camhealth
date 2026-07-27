@@ -1,0 +1,10 @@
+{
+  "name": "@camhealth/shared",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Types and constants shared by the CamHealth desktop and mobile apps.",
+  "type": "module",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "license": "UNLICENSED"
+}
