@@ -13,6 +13,8 @@ def api_root(_request):
                 "auth/token/", "auth/token/refresh/",
                 "users/", "audit-logs/", "patients/",
                 "consultations/", "prescriptions/", "invoices/", "payments/",
+                "drugs/", "drugs/alerts/", "stock-movements/",
+                "appointments/", "appointments/queue/",
                 "sync/pull/", "sync/push/",
             ],
         }
@@ -27,6 +29,8 @@ api_patterns = [
     path("", include("patients.urls")),
     path("", include("clinical.urls")),
     path("", include("billing.urls")),
+    path("", include("pharmacy.urls")),
+    path("", include("appointments.urls")),
     path("", include("sync.urls")),
 ]
 

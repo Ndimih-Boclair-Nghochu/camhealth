@@ -38,6 +38,26 @@ export enum PaymentMethod {
   MOMO_ORANGE = "MOMO_ORANGE",
 }
 
+export enum StockStatus {
+  OK = "OK",
+  LOW = "LOW",
+  OUT = "OUT",
+}
+
+export enum StockMovementKind {
+  IN = "IN",
+  OUT = "OUT",
+  ADJUST = "ADJUST",
+}
+
+export enum AppointmentStatus {
+  BOOKED = "BOOKED",
+  WAITING = "WAITING",
+  IN_CONSULTATION = "IN_CONSULTATION",
+  DONE = "DONE",
+  CANCELLED = "CANCELLED",
+}
+
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
   [PaymentMethod.CASH]: "Cash",
   [PaymentMethod.MOMO_MTN]: "MTN Mobile Money",
@@ -160,6 +180,45 @@ export interface Invoice {
   created_at: string;
 }
 
+export interface Drug {
+  id: string;
+  name: string;
+  unit: string;
+  price: string;
+  stock_quantity: number;
+  reorder_level: number;
+  active: boolean;
+  stock_status: StockStatus;
+  is_low: boolean;
+  is_out: boolean;
+  created_at: string;
+}
+
+export interface StockMovement {
+  id: string;
+  drug: string;
+  drug_name: string;
+  kind: StockMovementKind;
+  kind_display: string;
+  quantity: number;
+  reason: string;
+  prescription: string | null;
+  created_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  patient: string;
+  patient_name: string;
+  patient_code: string;
+  scheduled_for: string;
+  reason: string;
+  status: AppointmentStatus;
+  status_display: string;
+  doctor: string | null;
+  created_at: string;
+}
+
 export interface Paginated<T> {
   count: number;
   next: string | null;
@@ -185,4 +244,9 @@ export const API = {
   prescriptions: "/prescriptions/",
   invoices: "/invoices/",
   payments: "/payments/",
+  drugs: "/drugs/",
+  drugAlerts: "/drugs/alerts/",
+  stockMovements: "/stock-movements/",
+  appointments: "/appointments/",
+  appointmentQueue: "/appointments/queue/",
 } as const;

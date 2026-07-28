@@ -22,6 +22,12 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/patients" className="nav-item">
             <span>Patients</span>
           </NavLink>
+          <NavLink to="/appointments" className="nav-item">
+            <span>Appointments</span>
+          </NavLink>
+          <NavLink to="/pharmacy" className="nav-item">
+            <span>Pharmacy</span>
+          </NavLink>
         </nav>
         <div className="sidebar-foot muted">Phase 1 · v1.0.0</div>
       </aside>
