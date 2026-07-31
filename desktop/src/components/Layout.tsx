@@ -25,6 +25,9 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/appointments" className="nav-item">
             <span>Appointments</span>
           </NavLink>
+          <NavLink to="/laboratory" className="nav-item">
+            <span>Laboratory</span>
+          </NavLink>
           <NavLink to="/pharmacy" className="nav-item">
             <span>Pharmacy</span>
           </NavLink>

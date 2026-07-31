@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from accounts.models import Role, User
 from billing.models import Invoice, InvoiceItem, Payment
 from clinical.models import Consultation, Prescription, PrescriptionItem
+from lab.models import LabTest
 from patients.models import Patient
 from pharmacy.models import Drug
 
@@ -84,5 +85,12 @@ class Command(BaseCommand):
             Drug.objects.create(name="Amoxicillin 500mg", unit="capsule", price=Decimal("75"), stock_quantity=25, reorder_level=50)  # LOW
             Drug.objects.create(name="ORS sachet", unit="sachet", price=Decimal("100"), stock_quantity=0, reorder_level=20)  # OUT
             self.stdout.write("  + sample pharmacy drugs (incl. one low, one out of stock)")
+
+        if not LabTest.objects.exists():
+            LabTest.objects.create(name="Malaria RDT", price=Decimal("1500"), sample_type="blood")
+            LabTest.objects.create(name="Full Blood Count", price=Decimal("4000"), sample_type="blood")
+            LabTest.objects.create(name="Fasting Blood Sugar", price=Decimal("2000"), sample_type="blood", normal_range="0.7-1.1 g/L")
+            LabTest.objects.create(name="Widal Test", price=Decimal("2500"), sample_type="blood")
+            self.stdout.write("  + sample laboratory tests")
 
         self.stdout.write(self.style.SUCCESS("Demo data ready. Login: admin / camhealth123"))

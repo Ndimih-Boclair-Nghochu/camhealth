@@ -7,6 +7,8 @@ import {
   type Consultation,
   type Invoice,
   type InvoiceItem,
+  type LabOrder,
+  type LabTest,
   type Paginated,
   type Patient,
   type PrescriptionItem,
@@ -71,6 +73,111 @@ export default function PatientDetail() {
       </div>
 
       <BillingPanel patientId={patient.id} invoices={invoices} onChanged={loadAll} />
+
+      <LabPanel patientId={patient.id} />
+    </div>
+  );
+}
+
+/* ---------------- Laboratory ---------------- */
+
+function LabPanel({ patientId }: { patientId: string }) {
+  const [tests, setTests] = useState<LabTest[]>([]);
+  const [orders, setOrders] = useState<LabOrder[]>([]);
+  const [picked, setPicked] = useState<Record<string, boolean>>({});
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  async function load() {
+    const [t, o] = await Promise.all([
+      api.get<Paginated<LabTest>>("/lab-tests/"),
+      api.get<Paginated<LabOrder>>("/lab-orders/", { params: { patient: patientId } }),
+    ]);
+    setTests(t.data.results);
+    setOrders(o.data.results);
+  }
+
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientId]);
+
+  async function order(e: React.FormEvent) {
+    e.preventDefault();
+    const items = tests
+      .filter((t) => picked[t.id])
+      .map((t) => ({ test: t.id, test_name: t.name }));
+    if (!items.length) return;
+    setSaving(true);
+    try {
+      await api.post("/lab-orders/", { patient: patientId, items });
+      setPicked({});
+      setOpen(false);
+      load();
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="card">
+      <div className="panel-head">
+        <h2>Laboratory</h2>
+        <button className="btn primary sm" onClick={() => setOpen((o) => !o)}>
+          {open ? "Close" : "+ Order tests"}
+        </button>
+      </div>
+
+      {open && (
+        <form onSubmit={order}>
+          <div className="chips-pick">
+            {tests.map((t) => (
+              <label key={t.id} className="pick">
+                <input
+                  type="checkbox"
+                  checked={!!picked[t.id]}
+                  onChange={(e) => setPicked({ ...picked, [t.id]: e.target.checked })}
+                />
+                {t.name}
+              </label>
+            ))}
+          </div>
+          <div className="form-actions">
+            <button className="btn primary" disabled={saving}>
+              {saving ? "Ordering…" : "Order selected tests"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      <ul className="timeline">
+        {orders.map((o) => (
+          <li key={o.id}>
+            <div className="tl-date">{new Date(o.created_at).toLocaleDateString()}</div>
+            <div>
+              <span className={`pill ${o.status === "COMPLETED" ? "ok" : "status"}`}>{o.status_display}</span>
+              <div className="sm" style={{ marginTop: 4 }}>
+                {o.items.map((it) => (
+                  <div key={it.id}>
+                    <strong>{it.test_name}:</strong>{" "}
+                    {it.result_value ? (
+                      <>
+                        {it.result_value} {it.unit}{" "}
+                        {it.flag !== "PENDING" && it.flag !== "NORMAL" && (
+                          <span className="warn">({it.flag_display})</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="muted">pending</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </li>
+        ))}
+        {orders.length === 0 && <li className="muted">No lab orders yet.</li>}
+      </ul>
     </div>
   );
 }

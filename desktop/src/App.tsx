@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import { useAuth } from "./lib/auth";
 import Appointments from "./pages/Appointments";
 import Dashboard from "./pages/Dashboard";
+import Laboratory from "./pages/Laboratory";
 import Login from "./pages/Login";
 import PatientDetail from "./pages/PatientDetail";
 import Patients from "./pages/Patients";
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="/patients" element={<Patients />} />
         <Route path="/patients/:id" element={<PatientDetail />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/laboratory" element={<Laboratory />} />
         <Route path="/pharmacy" element={<Pharmacy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

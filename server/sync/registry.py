@@ -7,6 +7,7 @@ for change detection.
 from appointments.models import Appointment
 from billing.models import Invoice, InvoiceItem, Payment
 from clinical.models import Consultation, Prescription, PrescriptionItem
+from lab.models import LabOrder, LabResult, LabTest
 from patients.models import Patient
 from pharmacy.models import Drug, StockMovement
 
@@ -21,6 +22,9 @@ SYNCABLE = [
     ("pharmacy.drug", Drug),
     ("pharmacy.stockmovement", StockMovement),
     ("appointments.appointment", Appointment),
+    ("lab.labtest", LabTest),
+    ("lab.laborder", LabOrder),
+    ("lab.labresult", LabResult),
 ]
 
 LABEL_TO_MODEL = {label: model for label, model in SYNCABLE}

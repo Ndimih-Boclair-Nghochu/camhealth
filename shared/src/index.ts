@@ -58,6 +58,21 @@ export enum AppointmentStatus {
   CANCELLED = "CANCELLED",
 }
 
+export enum LabOrderStatus {
+  ORDERED = "ORDERED",
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
+  CANCELLED = "CANCELLED",
+}
+
+export enum LabFlag {
+  PENDING = "PENDING",
+  NORMAL = "NORMAL",
+  HIGH = "HIGH",
+  LOW = "LOW",
+  ABNORMAL = "ABNORMAL",
+}
+
 export const PAYMENT_METHOD_LABEL: Record<PaymentMethod, string> = {
   [PaymentMethod.CASH]: "Cash",
   [PaymentMethod.MOMO_MTN]: "MTN Mobile Money",
@@ -219,6 +234,40 @@ export interface Appointment {
   created_at: string;
 }
 
+export interface LabTest {
+  id: string;
+  name: string;
+  price: string;
+  sample_type: string;
+  normal_range: string;
+  active: boolean;
+}
+
+export interface LabResult {
+  id?: string;
+  test: string | null;
+  test_name: string;
+  result_value: string;
+  unit: string;
+  normal_range: string;
+  flag: LabFlag;
+  flag_display?: string;
+}
+
+export interface LabOrder {
+  id: string;
+  patient: string;
+  patient_name: string;
+  patient_code: string;
+  consultation: string | null;
+  status: LabOrderStatus;
+  status_display: string;
+  notes: string;
+  ordered_by: string | null;
+  items: LabResult[];
+  created_at: string;
+}
+
 export interface Paginated<T> {
   count: number;
   next: string | null;
@@ -249,4 +298,7 @@ export const API = {
   stockMovements: "/stock-movements/",
   appointments: "/appointments/",
   appointmentQueue: "/appointments/queue/",
+  labTests: "/lab-tests/",
+  labOrders: "/lab-orders/",
+  labOrdersPending: "/lab-orders/pending/",
 } as const;

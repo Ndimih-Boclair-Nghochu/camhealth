@@ -15,6 +15,7 @@ def api_root(_request):
                 "consultations/", "prescriptions/", "invoices/", "payments/",
                 "drugs/", "drugs/alerts/", "stock-movements/",
                 "appointments/", "appointments/queue/",
+                "lab-tests/", "lab-orders/", "lab-orders/pending/",
                 "sync/pull/", "sync/push/",
             ],
         }
@@ -31,6 +32,7 @@ api_patterns = [
     path("", include("billing.urls")),
     path("", include("pharmacy.urls")),
     path("", include("appointments.urls")),
+    path("", include("lab.urls")),
     path("", include("sync.urls")),
 ]
 
