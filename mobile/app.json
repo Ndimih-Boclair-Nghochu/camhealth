@@ -3,11 +3,19 @@
     "name": "CamHealth",
     "slug": "camhealth",
     "version": "1.0.0",
+    "scheme": "camhealth",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "splash": { "backgroundColor": "#0f2942" },
-    "assetBundlePatterns": ["**/*"],
+    "splash": {
+      "backgroundColor": "#0f2942",
+      "resizeMode": "contain"
+    },
     "ios": { "supportsTablet": true },
-    "android": { "package": "com.nbntech.camhealth" }
+    "android": {
+      "package": "com.nbntech.camhealth",
+      "adaptiveIcon": { "backgroundColor": "#0f2942" }
+    },
+    "web": { "bundler": "metro" },
+    "plugins": ["expo-router"]
   }
 }
