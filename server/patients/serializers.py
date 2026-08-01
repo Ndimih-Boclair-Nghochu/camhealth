@@ -13,6 +13,7 @@ class PatientSerializer(serializers.ModelSerializer):
         fields = [
             "id", "patient_code", "first_name", "last_name", "full_name",
             "sex", "date_of_birth", "age", "phone", "address", "blood_group",
-            "allergies", "chronic_conditions", "qr_payload", "created_at",
+            "allergies", "chronic_conditions", "qr_payload",
+            "activation_code", "account", "created_at",
         ]
-        read_only_fields = ["patient_code", "created_at"]
+        read_only_fields = ["patient_code", "activation_code", "account", "created_at"]

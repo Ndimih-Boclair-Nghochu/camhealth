@@ -32,6 +32,9 @@ class Patient(BaseModel):
         settings.AUTH_USER_MODEL, null=True, blank=True,
         on_delete=models.SET_NULL, related_name="patient_profile",
     )
+    # Given to patients registered in person by staff so they can later claim
+    # (activate) their own app account. Blank once an account is linked.
+    activation_code = models.CharField(max_length=20, unique=True, null=True, blank=True)
 
     class Meta(BaseModel.Meta):
         indexes = [models.Index(fields=["last_name", "first_name"])]
@@ -58,8 +61,14 @@ class Patient(BaseModel):
         return f"CAMHEALTH:{self.patient_code}"
 
     def save(self, *args, **kwargs):
+        from common.models import generate_code
+
         if not self.patient_code:
             self.patient_code = self._next_code()
+        # Patients created in person by staff (no linked login yet) get a code
+        # they can use to activate their own app account later.
+        if not self.account_id and not self.activation_code:
+            self.activation_code = generate_code(Patient, "activation_code", "PT")
         super().save(*args, **kwargs)
 
     @staticmethod

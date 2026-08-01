@@ -49,6 +49,16 @@ export default function PatientDetail() {
         </h1>
       </div>
 
+      {patient.activation_code && !patient.account && (
+        <div className="card activation-banner">
+          <div>
+            <strong>Activation code</strong>
+            <div className="muted sm">Give this to the patient to claim their own app account.</div>
+          </div>
+          <code className="matricule">{patient.activation_code}</code>
+        </div>
+      )}
+
       <div className="detail-grid">
         <div className="card idcard">
           <QRCodeSVG value={patient.qr_payload} size={104} />

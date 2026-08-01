@@ -129,6 +129,18 @@ input:focus, select:focus, textarea:focus { outline: 2px solid rgba(29, 111, 107
 .pill.partial, .pill.low { background: #fdf1dd; color: var(--warn); }
 .pill.status { background: #e7eef6; color: var(--navy-d); }
 
+.matricule {
+  display: inline-block; font-family: "Cascadia Code", Consolas, monospace;
+  font-size: 22px; font-weight: 700; letter-spacing: 2px; color: var(--navy);
+  background: #eef7f6; border: 1px dashed var(--accent); border-radius: 10px;
+  padding: 8px 16px; margin-top: 8px; user-select: all;
+}
+.activation-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  border-left: 4px solid var(--accent);
+}
+.activation-banner .matricule { margin-top: 0; }
+
 .alert-banner {
   background: #fdf1dd; border: 1px solid #f0d9a8; color: #7a5200;
   padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 13px;

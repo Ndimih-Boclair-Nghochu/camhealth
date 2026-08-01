@@ -70,6 +70,19 @@ export async function register(payload: RegisterPayload) {
   return data;
 }
 
+export interface ActivatePayload {
+  matricule: string;
+  password: string;
+  username?: string;
+}
+
+export async function activate(payload: ActivatePayload) {
+  const base = await getApiBase();
+  const { data } = await axios.post(`${base}/auth/activate/`, payload);
+  await AsyncStorage.multiSet([[ACCESS, data.access], [REFRESH, data.refresh]]);
+  return data;
+}
+
 export async function logout() {
   await AsyncStorage.multiRemove([ACCESS, REFRESH]);
 }

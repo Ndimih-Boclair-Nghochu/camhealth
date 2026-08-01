@@ -1,6 +1,40 @@
 from rest_framework import serializers
 
-from .models import AuditLog, Role, User
+from .models import AuditLog, Branch, Role, User
+
+
+class BranchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Branch
+        fields = ["id", "name", "address", "city", "phone", "active", "created_at"]
+
+
+class StaffSerializer(serializers.ModelSerializer):
+    """Admin view of a staff member. Matricule + activation status are derived."""
+
+    role_display = serializers.CharField(source="get_role_display", read_only=True)
+    branch_name = serializers.CharField(source="branch.name", read_only=True)
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = [
+            "id", "username", "first_name", "last_name", "full_name", "phone",
+            "email", "role", "role_display", "branch", "branch_name",
+            "matricule", "activated", "is_active",
+        ]
+        read_only_fields = ["username", "matricule", "activated"]
+
+    def get_full_name(self, obj):
+        return obj.get_full_name() or obj.username
+
+
+class ActivateSerializer(serializers.Serializer):
+    """Activate a pending staff or patient account with its matricule."""
+
+    matricule = serializers.CharField()
+    password = serializers.CharField(min_length=6)
+    username = serializers.CharField(required=False, allow_blank=True)
 
 
 class RegisterSerializer(serializers.ModelSerializer):

@@ -50,6 +50,10 @@ export default function Landing() {
             I already have an account <Text style={{ color: colors.tealBright, fontWeight: "800" }}>Sign in</Text>
           </Text>
         </Pressable>
+        <Pressable onPress={() => router.push("/activate")} style={styles.activate}>
+          <Ionicons name="key-outline" size={15} color="#9fb4c9" />
+          <Text style={styles.activateText}>Have a matricule from the hospital? Activate</Text>
+        </Pressable>
         <Text style={styles.legal}>By continuing you agree to our Terms & Privacy Policy.</Text>
       </View>
     </View>
@@ -72,7 +76,9 @@ const styles = StyleSheet.create({
   actions: { paddingHorizontal: 20, paddingTop: 22 },
   cta: { backgroundColor: colors.tealBright, height: 56, borderRadius: radius.md, alignItems: "center", justifyContent: "center", ...shadow.card },
   ctaText: { color: "#04211f", fontWeight: "900", fontSize: 17 },
-  signin: { alignItems: "center", paddingVertical: 16 },
+  signin: { alignItems: "center", paddingVertical: 14 },
   signinText: { color: "#c3d3e2", fontSize: 14.5 },
+  activate: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, paddingVertical: 6 },
+  activateText: { color: "#9fb4c9", fontSize: 13 },
   legal: { color: "#6f8296", fontSize: 11.5, textAlign: "center", marginTop: 2 },
 });

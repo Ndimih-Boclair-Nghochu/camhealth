@@ -86,6 +86,12 @@ export default function Login() {
             <Text style={{ color: colors.muted }}>New here? </Text>
             <Link href="/register" replace><Text style={{ color: colors.teal, fontWeight: "700" }}>Create an account</Text></Link>
           </View>
+          <Link href="/activate" asChild>
+            <Pressable style={styles.activateRow}>
+              <Ionicons name="key-outline" size={15} color={colors.muted} />
+              <Text style={{ color: colors.muted, fontSize: 13 }}>Activate with a hospital matricule</Text>
+            </Pressable>
+          </Link>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -128,4 +134,5 @@ const styles = StyleSheet.create({
   ctaText: { color: "#fff", fontWeight: "800", fontSize: 16 },
   hint: { textAlign: "center", color: colors.muted, fontSize: 12, marginTop: 14 },
   bottomRow: { flexDirection: "row", justifyContent: "center", marginTop: 18 },
+  activateRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 12 },
 });

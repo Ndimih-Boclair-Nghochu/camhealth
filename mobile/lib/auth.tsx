@@ -1,8 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
 import {
-  api, hasToken, login as apiLogin, logout as apiLogout,
-  register as apiRegister, type RegisterPayload,
+  activate as apiActivate, api, hasToken, login as apiLogin, logout as apiLogout,
+  register as apiRegister, type ActivatePayload, type RegisterPayload,
 } from "./api";
 import type { User } from "./types";
 
@@ -11,6 +11,7 @@ interface AuthValue {
   loading: boolean;
   signIn: (u: string, p: string) => Promise<void>;
   signUp: (payload: RegisterPayload) => Promise<void>;
+  activateAccount: (payload: ActivatePayload) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -50,13 +51,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loadMe();
   }
 
+  async function activateAccount(payload: ActivatePayload) {
+    await apiActivate(payload);
+    setLoading(true);
+    await loadMe();
+  }
+
   async function signOut() {
     await apiLogout();
     setUser(null);
   }
 
   return (
-    <Ctx.Provider value={{ user, loading, signIn, signUp, signOut }}>{children}</Ctx.Provider>
+    <Ctx.Provider value={{ user, loading, signIn, signUp, activateAccount, signOut }}>{children}</Ctx.Provider>
   );
 }
 

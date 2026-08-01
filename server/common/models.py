@@ -1,6 +1,18 @@
+import secrets
 import uuid
 
 from django.db import models
+
+# Unambiguous alphabet (no 0/O/1/I) for human-typed activation codes.
+_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+
+def generate_code(model, field, prefix, length=6):
+    """A short, unique, human-friendly code like ``STF-7KQ4PZ``."""
+    while True:
+        code = f"{prefix}-{''.join(secrets.choice(_CODE_ALPHABET) for _ in range(length))}"
+        if not model._default_manager.filter(**{field: code}).exists():
+            return code
 
 
 class BaseModel(models.Model):

@@ -1,14 +1,23 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import AuditLog, User
+from .models import AuditLog, Branch, User
+
+
+@admin.register(Branch)
+class BranchAdmin(admin.ModelAdmin):
+    list_display = ("name", "city", "phone", "active")
+    search_fields = ("name", "city")
 
 
 @admin.register(User)
 class CamHealthUserAdmin(UserAdmin):
-    list_display = ("username", "first_name", "last_name", "role", "is_active")
-    list_filter = ("role", "is_active", "is_staff")
-    fieldsets = UserAdmin.fieldsets + (("CamHealth", {"fields": ("role", "phone")}),)
+    list_display = ("username", "first_name", "last_name", "role", "matricule", "activated", "is_active")
+    list_filter = ("role", "activated", "is_active", "branch")
+    fieldsets = UserAdmin.fieldsets + (
+        ("CamHealth", {"fields": ("role", "phone", "branch", "matricule", "activated")}),
+    )
+    readonly_fields = ("matricule",)
 
 
 @admin.register(AuditLog)

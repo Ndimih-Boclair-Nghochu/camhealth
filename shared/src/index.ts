@@ -13,6 +13,32 @@ export enum Role {
   RECEPTIONIST = "RECEPTIONIST",
   CASHIER = "CASHIER",
   PHARMACIST = "PHARMACIST",
+  PATIENT = "PATIENT",
+}
+
+export interface Branch {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  phone: string;
+  active: boolean;
+}
+
+export interface StaffMember {
+  id: string;
+  username: string;
+  full_name: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  role: string;
+  role_display: string;
+  branch: string | null;
+  branch_name: string | null;
+  matricule: string | null;
+  activated: boolean;
+  is_active: boolean;
 }
 
 export enum Sex {
@@ -86,6 +112,7 @@ export const ROLE_LABEL: Record<Role, string> = {
   [Role.RECEPTIONIST]: "Receptionist",
   [Role.CASHIER]: "Cashier",
   [Role.PHARMACIST]: "Pharmacist",
+  [Role.PATIENT]: "Patient",
 };
 
 // ---- Entities ----
@@ -118,6 +145,8 @@ export interface Patient {
   allergies: string;
   chronic_conditions: string;
   qr_payload: string;
+  activation_code: string | null;
+  account: string | null;
   created_at: string;
 }
 
@@ -327,6 +356,8 @@ export const API = {
   availability: "/availability/",
   pharmacies: "/pharmacies/",
   prescriptionQueue: "/prescriptions/queue/",
+  staff: "/staff/",
+  branches: "/branches/",
   labTests: "/lab-tests/",
   labOrders: "/lab-orders/",
   labOrdersPending: "/lab-orders/pending/",

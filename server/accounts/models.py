@@ -4,6 +4,25 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
+class Branch(models.Model):
+    """A hospital branch/site that staff can be assigned to."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=120)
+    address = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=80, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name_plural = "branches"
+
+    def __str__(self):
+        return self.name
+
+
 class Role(models.TextChoices):
     ADMIN = "ADMIN", "Administrator"
     DOCTOR = "DOCTOR", "Doctor"
@@ -26,6 +45,13 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.RECEPTIONIST)
     phone = models.CharField(max_length=20, blank=True)
+    # Staff created by an admin get a matricule and stay inactive until they
+    # activate their account with it. Self-registered patients are activated.
+    matricule = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    activated = models.BooleanField(default=True)
+    branch = models.ForeignKey(
+        Branch, null=True, blank=True, on_delete=models.SET_NULL, related_name="staff"
+    )
 
     @property
     def is_staff_member(self):

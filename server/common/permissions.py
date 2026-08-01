@@ -1,6 +1,18 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
+class IsAdmin(BasePermission):
+    """Hospital administrators (or superusers) only."""
+
+    message = "This action requires an administrator account."
+
+    def has_permission(self, request, view):
+        user = request.user
+        return bool(
+            user and user.is_authenticated and (user.is_superuser or getattr(user, "role", None) == "ADMIN")
+        )
+
+
 class IsStaff(BasePermission):
     """Hospital staff only (any role except a self-service patient)."""
 

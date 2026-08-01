@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import { useAuth } from "./lib/auth";
 import Appointments from "./pages/Appointments";
+import Branches from "./pages/Branches";
 import Dashboard from "./pages/Dashboard";
 import Laboratory from "./pages/Laboratory";
 import Login from "./pages/Login";
@@ -12,6 +13,7 @@ import Pharmacies from "./pages/Pharmacies";
 import Pharmacy from "./pages/Pharmacy";
 import RxQueue from "./pages/RxQueue";
 import Schedule from "./pages/Schedule";
+import Staff from "./pages/Staff";
 
 export default function App() {
   const { user, loading } = useAuth();
@@ -31,6 +33,8 @@ export default function App() {
         <Route path="/rx-queue" element={<RxQueue />} />
         <Route path="/pharmacies" element={<Pharmacies />} />
         <Route path="/schedule" element={<Schedule />} />
+        <Route path="/staff" element={<Staff />} />
+        <Route path="/branches" element={<Branches />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

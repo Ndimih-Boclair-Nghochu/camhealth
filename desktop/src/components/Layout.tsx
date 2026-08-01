@@ -40,6 +40,12 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/schedule" className="nav-item">
             <span>Timetable</span>
           </NavLink>
+          <NavLink to="/staff" className="nav-item">
+            <span>Staff</span>
+          </NavLink>
+          <NavLink to="/branches" className="nav-item">
+            <span>Branches</span>
+          </NavLink>
         </nav>
         <div className="sidebar-foot muted">Phase 1 · v1.0.0</div>
       </aside>
