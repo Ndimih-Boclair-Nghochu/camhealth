@@ -94,3 +94,44 @@ class DrugOrderItem(models.Model):
             if not self.unit_price:
                 self.unit_price = self.drug.price
         super().save(*args, **kwargs)
+
+
+class Facility(BaseModel):
+    """The hospital's location, used for directions and the staff geofence.
+
+    A single row (the current facility). Defaults to Bamenda, Cameroon.
+    """
+
+    name = models.CharField(max_length=120, default="CamHealth Hospital")
+    address = models.CharField(max_length=200, default="Mile 4, Bamenda")
+    latitude = models.FloatField(default=5.9631)
+    longitude = models.FloatField(default=10.1591)
+    geofence_radius_m = models.PositiveIntegerField(
+        default=250, help_text="Staff are 'on site' within this many metres."
+    )
+
+    class Meta:
+        verbose_name_plural = "facilities"
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def get_solo(cls):
+        return cls.objects.first() or cls.objects.create()
+
+
+class StaffLocation(models.Model):
+    """A staff member's last known position, only shared while on the premises."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="location"
+    )
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    at_hospital = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        where = "on site" if self.at_hospital else "off site"
+        return f"{self.user.username} ({where})"

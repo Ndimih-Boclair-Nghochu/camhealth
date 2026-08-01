@@ -103,3 +103,47 @@ class PortalTests(APITestCase):
 
     def test_symptom_check_requires_message(self):
         self.assertEqual(self.client.post("/api/symptom-check/", {"message": ""}, format="json").status_code, 400)
+
+
+class GeofenceTests(APITestCase):
+    HOSP = {"latitude": 5.9631, "longitude": 10.1591}
+
+    def setUp(self):
+        from portal.models import Facility
+        Facility.objects.create(geofence_radius_m=250, **self.HOSP)
+        self.a = User.objects.create_user("docA", password="pw", role=Role.DOCTOR, is_staff=True)
+        self.b = User.objects.create_user("nurseB", password="pw", role=Role.NURSE, is_staff=True)
+
+    def as_user(self, u):
+        self.client.force_authenticate(u)
+
+    def test_facility_is_readable(self):
+        self.as_user(self.a)
+        res = self.client.get("/api/facility/")
+        self.assertEqual(res.status_code, 200)
+        self.assertAlmostEqual(res.json()["latitude"], 5.9631, places=3)
+
+    def test_on_site_staff_can_see_each_other(self):
+        self.as_user(self.a)
+        self.client.post("/api/me/location/", self.HOSP, format="json")
+        self.as_user(self.b)
+        r = self.client.post("/api/me/location/", {"latitude": 5.9632, "longitude": 10.1592}, format="json")
+        self.assertTrue(r.json()["at_hospital"])
+        self.as_user(self.a)
+        res = self.client.get("/api/staff/on-site/").json()
+        self.assertTrue(res["on_site"])
+        self.assertEqual([s["name"] for s in res["staff"]], ["nurseB"])
+
+    def test_off_site_staff_cannot_locate_anyone(self):
+        # A is far from the hospital
+        self.as_user(self.a)
+        r = self.client.post("/api/me/location/", {"latitude": 6.5, "longitude": 11.0}, format="json")
+        self.assertFalse(r.json()["at_hospital"])
+        # B is on site
+        self.as_user(self.b)
+        self.client.post("/api/me/location/", self.HOSP, format="json")
+        # A (off site) is denied the roster
+        self.as_user(self.a)
+        res = self.client.get("/api/staff/on-site/").json()
+        self.assertFalse(res["on_site"])
+        self.assertEqual(res["staff"], [])

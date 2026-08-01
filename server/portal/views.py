@@ -1,3 +1,6 @@
+import math
+from datetime import timedelta
+
 from rest_framework import generics, viewsets
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated
@@ -5,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from django.db.models import F
+from django.utils import timezone
+
+from common.permissions import IsStaff
 
 from appointments.models import Appointment, AvailabilitySlot
 from appointments.serializers import AppointmentSerializer
@@ -18,8 +24,26 @@ from pharmacy.models import Drug
 from pharmacy.serializers import DrugSerializer
 
 from .ai import symptom_reply
-from .models import DrugOrder, HospitalPost
-from .serializers import DrugOrderSerializer, HospitalPostSerializer
+from .models import DrugOrder, Facility, HospitalPost, StaffLocation
+from .serializers import (
+    DrugOrderSerializer,
+    FacilitySerializer,
+    HospitalPostSerializer,
+    OnSiteStaffSerializer,
+)
+
+# Staff are considered present only if their location was updated this recently.
+PRESENCE_TTL = timedelta(minutes=5)
+
+
+def haversine_m(lat1, lon1, lat2, lon2):
+    """Great-circle distance between two points, in metres."""
+    r = 6371000
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dlambda / 2) ** 2
+    return 2 * r * math.asin(math.sqrt(a))
 
 
 def patient_profile(request):
@@ -158,3 +182,59 @@ class DrugOrderViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(patient=patient_profile(self.request), created_by=self.request.user)
+
+
+class FacilityView(generics.RetrieveUpdateAPIView):
+    """The hospital's location (for directions). Any signed-in user can read it;
+    only staff can update it."""
+
+    serializer_class = FacilitySerializer
+    permission_classes = [IsStaffOrReadOnly]
+
+    def get_object(self):
+        return Facility.get_solo()
+
+
+class MyLocationView(APIView):
+    """Staff device reports its location; we compute whether it's on the premises."""
+
+    permission_classes = [IsStaff]
+
+    def post(self, request):
+        try:
+            lat = float(request.data["latitude"])
+            lng = float(request.data["longitude"])
+        except (KeyError, TypeError, ValueError):
+            return Response({"detail": "latitude and longitude are required."}, status=400)
+
+        facility = Facility.get_solo()
+        distance = haversine_m(lat, lng, facility.latitude, facility.longitude)
+        at_hospital = distance <= facility.geofence_radius_m
+
+        StaffLocation.objects.update_or_create(
+            user=request.user,
+            defaults={"latitude": lat, "longitude": lng, "at_hospital": at_hospital},
+        )
+        return Response({"at_hospital": at_hospital, "distance_m": round(distance)})
+
+
+class OnSiteStaffView(APIView):
+    """List colleagues currently on site — but only if the requester is on site.
+    Once a staff member leaves the premises, they can no longer locate anyone."""
+
+    permission_classes = [IsStaff]
+
+    def get(self, request):
+        cutoff = timezone.now() - PRESENCE_TTL
+        mine = StaffLocation.objects.filter(user=request.user).first()
+        on_site = bool(mine and mine.at_hospital and mine.updated_at >= cutoff)
+
+        if not on_site:
+            return Response({"on_site": False, "staff": []})
+
+        colleagues = (
+            StaffLocation.objects.select_related("user")
+            .filter(at_hospital=True, updated_at__gte=cutoff)
+            .exclude(user=request.user)
+        )
+        return Response({"on_site": True, "staff": OnSiteStaffSerializer(colleagues, many=True).data})

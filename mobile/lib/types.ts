@@ -166,6 +166,23 @@ export interface RecordsBundle {
   invoices: Invoice[];
 }
 
+export interface Facility {
+  id: string;
+  name: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  geofence_radius_m: number;
+}
+
+export interface OnSiteStaff {
+  name: string;
+  role: string;
+  latitude: number;
+  longitude: number;
+  updated_at: string;
+}
+
 export interface Paginated<T> {
   count: number;
   results: T[];

@@ -20,6 +20,7 @@ const SERVICES: Service[] = [
   { label: "Laboratory", desc: "Orders & results", icon: "flask", tint: "#0ea5a4", href: "/laboratory" },
   { label: "Pharmacy", desc: "Stock & dispensing", icon: "medkit", tint: "#e0803a", href: "/pharmacy" },
   { label: "Billing", desc: "Invoices & payments", icon: "cash", tint: "#16a34a", href: "/billing" },
+  { label: "Staff on-site", desc: "Locate colleagues at work", icon: "navigate", tint: "#0ea5a4", href: "/staff-map" },
 ];
 
 export default function Services() {

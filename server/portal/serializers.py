@@ -1,6 +1,24 @@
 from rest_framework import serializers
 
-from .models import DrugOrder, DrugOrderItem, HospitalPost
+from .models import DrugOrder, DrugOrderItem, Facility, HospitalPost, StaffLocation
+
+
+class FacilitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Facility
+        fields = ["id", "name", "address", "latitude", "longitude", "geofence_radius_m"]
+
+
+class OnSiteStaffSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    role = serializers.CharField(source="user.get_role_display", read_only=True)
+
+    class Meta:
+        model = StaffLocation
+        fields = ["name", "role", "latitude", "longitude", "updated_at"]
+
+    def get_name(self, obj):
+        return obj.user.get_full_name() or obj.user.username
 
 
 class HospitalPostSerializer(serializers.ModelSerializer):
