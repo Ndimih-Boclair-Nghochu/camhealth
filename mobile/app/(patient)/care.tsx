@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Button, Card, Empty, Loader, Pill } from "../../components/ui";
+import { AppHeader, Button, Card, Empty, Loader, Pill } from "../../components/ui";
 import { TextField } from "../../components/kit";
 import { api } from "../../lib/api";
 import { colors, radius } from "../../lib/theme";
@@ -59,10 +59,7 @@ export default function Care() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
-        <Text style={styles.title}>Care</Text>
-        <Text style={styles.subtitle}>Book from the hospital's available times</Text>
-      </View>
+      <AppHeader title="Care" subtitle="Book from the hospital's available times" />
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Card>

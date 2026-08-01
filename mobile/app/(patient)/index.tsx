@@ -4,18 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Avatar, Card } from "../../components/ui";
+import { Avatar, Card, SectionTitle } from "../../components/ui";
 import { api } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
-import { colors, radius, shadow } from "../../lib/theme";
+import { colors, fs, radius, s, shadow, spacing } from "../../lib/theme";
 import type { Appointment, HospitalPost } from "../../lib/types";
 
 const QUICK = [
   { label: "Book visit", icon: "calendar", tint: "#3b82f6", href: "/(patient)/care" },
   { label: "Pharmacy", icon: "cart", tint: "#e0803a", href: "/(patient)/pharmacy" },
-  { label: "My records", icon: "folder-open", tint: "#1d6f6b", href: "/(patient)/records" },
-  { label: "Symptom check", icon: "pulse", tint: "#8b5cf6", href: "/(patient)/symptom" },
-  { label: "Find hospital", icon: "navigate", tint: "#0ea5a4", href: "/(patient)/directions" },
+  { label: "Records", icon: "folder-open", tint: "#1d6f6b", href: "/(patient)/records" },
+  { label: "Symptoms", icon: "pulse", tint: "#8b5cf6", href: "/(patient)/symptom" },
+  { label: "Directions", icon: "navigate", tint: "#0ea5a4", href: "/(patient)/directions" },
 ] as const;
 
 const CAT_TONE: Record<string, string> = { ALERT: colors.danger, CAMPAIGN: "#8b5cf6", TIP: colors.ok, NEWS: colors.teal };
@@ -39,9 +39,7 @@ export default function PatientHome() {
         .sort((a, b) => +new Date(a.scheduled_for) - +new Date(b.scheduled_for));
       setNext(upcoming[0] ?? null);
       setFeed(posts.data.results);
-    } catch {
-      /* empty states handle it */
-    }
+    } catch { /* empty states handle it */ }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -52,99 +50,111 @@ export default function PatientHome() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
-        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-          <View>
+      <View style={[styles.header, { paddingTop: insets.top + s(14) }]}>
+        <View style={styles.glow} />
+        <View style={styles.headerRow}>
+          <View style={{ flex: 1 }}>
             <Text style={styles.greeting}>{greeting},</Text>
-            <Text style={styles.name}>{user?.full_name || user?.username}</Text>
+            <Text style={styles.name} numberOfLines={1}>{user?.full_name || user?.username}</Text>
           </View>
-          <Avatar name={user?.full_name || "?"} color={colors.tealBright} />
+          <Pressable onPress={() => router.push("/(patient)/profile")}>
+            <Avatar name={user?.full_name || "?"} size={s(46)} color={colors.tealBright} />
+          </Pressable>
         </View>
       </View>
 
       <ScrollView
-        style={{ flex: 1, marginTop: -34 }}
-        contentContainerStyle={{ padding: 18, paddingBottom: 30 }}
+        style={{ flex: 1, marginTop: -s(30) }}
+        contentContainerStyle={{ paddingBottom: s(28) }}
+        showsVerticalScrollIndicator={false}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.teal} />}
       >
-        <Card style={styles.quickCard}>
+        {/* Quick actions — horizontal, responsive */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: spacing.md, gap: s(12) }}
+        >
           {QUICK.map((q) => (
             <Pressable key={q.label} style={styles.quick} onPress={() => router.push(q.href as any)}>
               <View style={[styles.quickIcon, { backgroundColor: q.tint + "1e" }]}>
-                <Ionicons name={q.icon as any} size={22} color={q.tint} />
+                <Ionicons name={q.icon as any} size={fs(23)} color={q.tint} />
               </View>
-              <Text style={styles.quickLabel}>{q.label}</Text>
+              <Text style={styles.quickLabel} numberOfLines={1}>{q.label}</Text>
             </Pressable>
           ))}
-        </Card>
+        </ScrollView>
 
-        <Text style={styles.section}>Upcoming visit</Text>
-        {next ? (
-          <Card style={styles.apptCard}>
-            <View style={styles.apptDate}>
-              <Text style={styles.apptDay}>{new Date(next.scheduled_for).getDate()}</Text>
-              <Text style={styles.apptMon}>{new Date(next.scheduled_for).toLocaleString("en", { month: "short" })}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.apptTitle}>{next.reason || "Appointment"}</Text>
-              <Text style={styles.apptSub}>
-                {new Date(next.scheduled_for).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })} · {next.status_display}
-              </Text>
-            </View>
-            <Ionicons name="chevron-forward" size={18} color={colors.muted} />
-          </Card>
-        ) : (
-          <Pressable onPress={() => router.push("/(patient)/care")}>
-            <Card style={styles.emptyAppt}>
-              <Ionicons name="add-circle" size={22} color={colors.teal} />
-              <Text style={{ color: colors.teal, fontWeight: "700" }}>Book an appointment</Text>
-            </Card>
-          </Pressable>
-        )}
-
-        <Text style={styles.section}>From your hospital</Text>
-        {feed.length === 0 ? (
-          <Card><Text style={{ color: colors.muted }}>No posts yet.</Text></Card>
-        ) : (
-          feed.map((p) => (
-            <Card key={p.id} style={{ marginBottom: 12 }}>
-              <View style={styles.postHead}>
-                <View style={[styles.catDot, { backgroundColor: (CAT_TONE[p.category] || colors.teal) + "22" }]}>
-                  <Ionicons name="megaphone" size={14} color={CAT_TONE[p.category] || colors.teal} />
-                </View>
-                <Text style={[styles.cat, { color: CAT_TONE[p.category] || colors.teal }]}>{p.category_display}</Text>
-                <Text style={styles.postDate}>{new Date(p.created_at).toLocaleDateString()}</Text>
+        <View style={{ paddingHorizontal: spacing.md }}>
+          <SectionTitle style={{ marginTop: s(22) }}>Upcoming visit</SectionTitle>
+          {next ? (
+            <Card onPress={() => router.push("/(patient)/care")} style={styles.apptCard}>
+              <View style={styles.apptDate}>
+                <Text style={styles.apptDay}>{new Date(next.scheduled_for).getDate()}</Text>
+                <Text style={styles.apptMon}>{new Date(next.scheduled_for).toLocaleString("en", { month: "short" })}</Text>
               </View>
-              <Text style={styles.postTitle}>{p.title}</Text>
-              <Text style={styles.postBody} numberOfLines={3}>{p.body}</Text>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.apptTitle}>{next.reason || "Appointment"}</Text>
+                <Text style={styles.apptSub}>
+                  {new Date(next.scheduled_for).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })} · {next.status_display}
+                </Text>
+              </View>
+              <Ionicons name="chevron-forward" size={fs(18)} color={colors.muted} />
             </Card>
-          ))
-        )}
+          ) : (
+            <Card onPress={() => router.push("/(patient)/care")} style={styles.emptyAppt}>
+              <Ionicons name="add-circle" size={fs(22)} color={colors.teal} />
+              <Text style={{ color: colors.teal, fontWeight: "700", fontSize: fs(14.5) }}>Book an appointment</Text>
+            </Card>
+          )}
+
+          <SectionTitle style={{ marginTop: s(24) }}>From your hospital</SectionTitle>
+          {feed.length === 0 ? (
+            <Card><Text style={{ color: colors.muted }}>No posts yet.</Text></Card>
+          ) : (
+            feed.map((p) => (
+              <Card key={p.id} style={{ marginBottom: s(12) }}>
+                <View style={styles.postHead}>
+                  <View style={[styles.catDot, { backgroundColor: (CAT_TONE[p.category] || colors.teal) + "22" }]}>
+                    <Ionicons name="megaphone" size={fs(14)} color={CAT_TONE[p.category] || colors.teal} />
+                  </View>
+                  <Text style={[styles.cat, { color: CAT_TONE[p.category] || colors.teal }]}>{p.category_display}</Text>
+                  <Text style={styles.postDate}>{new Date(p.created_at).toLocaleDateString()}</Text>
+                </View>
+                <Text style={styles.postTitle}>{p.title}</Text>
+                <Text style={styles.postBody} numberOfLines={3}>{p.body}</Text>
+              </Card>
+            ))
+          )}
+        </View>
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { backgroundColor: colors.navy, paddingHorizontal: 18, paddingBottom: 46, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
-  greeting: { color: "#9fb4c9", fontSize: 14 },
-  name: { color: "#fff", fontSize: 22, fontWeight: "800", marginTop: 2 },
-  quickCard: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 16 },
-  quick: { alignItems: "center", gap: 8, width: "23%" },
-  quickIcon: { width: 52, height: 52, borderRadius: 16, alignItems: "center", justifyContent: "center" },
-  quickLabel: { fontSize: 11.5, color: colors.sub, fontWeight: "600", textAlign: "center" },
-  section: { fontSize: 16, fontWeight: "800", color: colors.ink, marginTop: 22, marginBottom: 10 },
-  apptCard: { flexDirection: "row", alignItems: "center", gap: 14 },
-  apptDate: { width: 54, height: 54, borderRadius: 14, backgroundColor: colors.navy, alignItems: "center", justifyContent: "center" },
-  apptDay: { color: "#fff", fontSize: 20, fontWeight: "800" },
-  apptMon: { color: "#9fb4c9", fontSize: 11, textTransform: "uppercase" },
-  apptTitle: { fontSize: 15.5, fontWeight: "700", color: colors.ink },
-  apptSub: { fontSize: 12.5, color: colors.muted, marginTop: 3 },
-  emptyAppt: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  postHead: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8 },
-  catDot: { width: 26, height: 26, borderRadius: 8, alignItems: "center", justifyContent: "center" },
-  cat: { fontSize: 11.5, fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.4, flex: 1 },
-  postDate: { fontSize: 11.5, color: colors.muted },
-  postTitle: { fontSize: 16, fontWeight: "800", color: colors.ink },
-  postBody: { fontSize: 13.5, color: colors.sub, marginTop: 4, lineHeight: 19 },
+  header: {
+    backgroundColor: colors.navy, paddingHorizontal: spacing.md, paddingBottom: s(44),
+    borderBottomLeftRadius: radius.xl, borderBottomRightRadius: radius.xl, overflow: "hidden",
+  },
+  glow: { position: "absolute", top: -s(70), right: -s(60), width: s(200), height: s(200), borderRadius: s(100), backgroundColor: colors.teal, opacity: 0.28 },
+  headerRow: { flexDirection: "row", alignItems: "center" },
+  greeting: { color: "#9fb4c9", fontSize: fs(14) },
+  name: { color: "#fff", fontSize: fs(23), fontWeight: "800", marginTop: s(2) },
+  quick: { alignItems: "center", gap: s(7), width: s(70) },
+  quickIcon: { width: s(58), height: s(58), borderRadius: radius.md, alignItems: "center", justifyContent: "center", ...shadow.soft, backgroundColor: colors.card },
+  quickLabel: { fontSize: fs(11.5), color: colors.sub, fontWeight: "600", textAlign: "center" },
+  apptCard: { flexDirection: "row", alignItems: "center", gap: s(14) },
+  apptDate: { width: s(54), height: s(54), borderRadius: radius.md, backgroundColor: colors.navy, alignItems: "center", justifyContent: "center" },
+  apptDay: { color: "#fff", fontSize: fs(20), fontWeight: "800" },
+  apptMon: { color: "#9fb4c9", fontSize: fs(11), textTransform: "uppercase" },
+  apptTitle: { fontSize: fs(15.5), fontWeight: "700", color: colors.ink },
+  apptSub: { fontSize: fs(12.5), color: colors.muted, marginTop: s(3) },
+  emptyAppt: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: s(8) },
+  postHead: { flexDirection: "row", alignItems: "center", gap: s(8), marginBottom: s(8) },
+  catDot: { width: s(26), height: s(26), borderRadius: s(8), alignItems: "center", justifyContent: "center" },
+  cat: { fontSize: fs(11.5), fontWeight: "800", textTransform: "uppercase", letterSpacing: 0.4, flex: 1 },
+  postDate: { fontSize: fs(11.5), color: colors.muted },
+  postTitle: { fontSize: fs(16), fontWeight: "800", color: colors.ink },
+  postBody: { fontSize: fs(13.5), color: colors.sub, marginTop: s(4), lineHeight: fs(19) },
 });

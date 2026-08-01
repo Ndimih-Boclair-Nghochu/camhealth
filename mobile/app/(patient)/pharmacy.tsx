@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Button, Card, Empty, Loader, Pill } from "../../components/ui";
+import { AppHeader, Button, Card, Empty, Loader, Pill, Segmented } from "../../components/ui";
 import { api, money } from "../../lib/api";
-import { colors, radius, shadow } from "../../lib/theme";
+import { colors, radius, shadow, spacing } from "../../lib/theme";
 import type { Drug, DrugOrder, Paginated } from "../../lib/types";
 
 const METHODS = [
@@ -60,15 +60,13 @@ export default function PatientPharmacy() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
-        <Text style={styles.title}>Pharmacy</Text>
-        <View style={styles.tabs}>
-          {(["shop", "orders"] as const).map((t) => (
-            <Pressable key={t} onPress={() => setTab(t)} style={[styles.tab, tab === t && styles.tabOn]}>
-              <Text style={[styles.tabText, tab === t && styles.tabTextOn]}>{t === "shop" ? "Shop" : "My orders"}</Text>
-            </Pressable>
-          ))}
-        </View>
+      <AppHeader title="Pharmacy" subtitle="Order medicines & track orders" />
+      <View style={{ paddingHorizontal: spacing.md, paddingTop: spacing.sm }}>
+        <Segmented
+          options={[{ label: "Shop", value: "shop" }, { label: "My orders", value: "orders" }]}
+          value={tab}
+          onChange={setTab}
+        />
       </View>
 
       {tab === "shop" ? (

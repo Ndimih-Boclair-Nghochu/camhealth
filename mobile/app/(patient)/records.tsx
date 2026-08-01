@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { Card, Empty, Loader, Pill } from "../../components/ui";
+import { AppHeader, Card, Empty, Loader, Pill } from "../../components/ui";
 import { api, money } from "../../lib/api";
 import { colors, radius } from "../../lib/theme";
 import type { RecordsBundle } from "../../lib/types";
@@ -18,10 +18,7 @@ export default function Records() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
-      <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
-        <Text style={styles.title}>My Health</Text>
-        {data && <Text style={styles.subtitle}>{data.patient.full_name} · {data.patient.patient_code}</Text>}
-      </View>
+      <AppHeader title="My Health" subtitle={data ? `${data.patient.full_name} · ${data.patient.patient_code}` : undefined} />
 
       {!data ? (
         <Loader />
