@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Logo } from "../components/Logo";
 import { DEFAULT_ORIGIN, getOrigin, setOrigin } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { colors, radius, shadow } from "../lib/theme";
@@ -54,7 +55,7 @@ export default function Register() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <View style={[styles.hero, { paddingTop: insets.top + 34 }]}>
-          <View style={styles.logo}><Text style={styles.logoMark}>C</Text></View>
+          <Logo size={64} style={{ marginBottom: 12 }} />
           <Text style={styles.brand}>Create your account</Text>
           <Text style={styles.brandSub}>Full access to every CamHealth service</Text>
         </View>

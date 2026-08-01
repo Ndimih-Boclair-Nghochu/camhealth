@@ -6,16 +6,21 @@
     "scheme": "camhealth",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "splash": {
-      "backgroundColor": "#0f2942",
-      "resizeMode": "contain"
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f2942"
     },
     "ios": { "supportsTablet": true },
     "android": {
       "package": "com.nbntech.camhealth",
-      "adaptiveIcon": { "backgroundColor": "#0f2942" }
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f2942"
+      }
     },
-    "web": { "bundler": "metro" },
+    "web": { "bundler": "metro", "favicon": "./assets/favicon.png" },
     "plugins": ["expo-router"]
   }
 }

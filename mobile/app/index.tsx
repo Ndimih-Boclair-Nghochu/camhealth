@@ -14,6 +14,6 @@ export default function Index() {
       </View>
     );
   }
-  if (!user) return <Redirect href="/login" />;
+  if (!user) return <Redirect href="/landing" />;
   return <Redirect href={user.role === "PATIENT" ? "/(patient)" : "/(tabs)"} />;
 }

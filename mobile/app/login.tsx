@@ -7,6 +7,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Logo } from "../components/Logo";
 import { DEFAULT_ORIGIN, getOrigin, setOrigin } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { colors, radius, shadow } from "../lib/theme";
@@ -49,9 +50,7 @@ export default function Login() {
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <View style={[styles.hero, { paddingTop: insets.top + 46 }]}>
-          <View style={styles.logo}>
-            <Text style={styles.logoMark}>C</Text>
-          </View>
+          <Logo size={72} style={{ marginBottom: 14 }} />
           <Text style={styles.brand}>CamHealth</Text>
           <Text style={styles.brandSub}>Hospital Management · NBN TECH</Text>
         </View>
