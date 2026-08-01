@@ -1,12 +1,16 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-import { api, hasToken, login as apiLogin, logout as apiLogout } from "./api";
+import {
+  api, hasToken, login as apiLogin, logout as apiLogout,
+  register as apiRegister, type RegisterPayload,
+} from "./api";
 import type { User } from "./types";
 
 interface AuthValue {
   user: User | null;
   loading: boolean;
   signIn: (u: string, p: string) => Promise<void>;
+  signUp: (payload: RegisterPayload) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -40,12 +44,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await loadMe();
   }
 
+  async function signUp(payload: RegisterPayload) {
+    await apiRegister(payload);
+    setLoading(true);
+    await loadMe();
+  }
+
   async function signOut() {
     await apiLogout();
     setUser(null);
   }
 
-  return <Ctx.Provider value={{ user, loading, signIn, signOut }}>{children}</Ctx.Provider>;
+  return (
+    <Ctx.Provider value={{ user, loading, signIn, signUp, signOut }}>{children}</Ctx.Provider>
+  );
 }
 
 export const useAuth = () => useContext(Ctx);

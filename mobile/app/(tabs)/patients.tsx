@@ -5,6 +5,7 @@ import { FlatList, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar, Empty, Loader, Row } from "../../components/ui";
+import { Fab } from "../../components/kit";
 import { api } from "../../lib/api";
 import { colors, radius } from "../../lib/theme";
 import type { Paginated, Patient } from "../../lib/types";
@@ -67,6 +68,7 @@ export default function Patients() {
           )}
         />
       )}
+      <Fab icon="person-add" onPress={() => router.push("/patient/new")} />
     </View>
   );
 }

@@ -10,7 +10,7 @@ def api_root(_request):
             "name": "CamHealth API",
             "version": "1.0 (Phase 1)",
             "endpoints": [
-                "auth/token/", "auth/token/refresh/",
+                "auth/register/", "auth/token/", "auth/token/refresh/",
                 "users/", "audit-logs/", "patients/",
                 "consultations/", "prescriptions/", "invoices/", "payments/",
                 "drugs/", "drugs/alerts/", "stock-movements/",

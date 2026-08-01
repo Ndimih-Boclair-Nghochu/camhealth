@@ -55,6 +55,21 @@ export async function login(username: string, password: string) {
   return data;
 }
 
+export interface RegisterPayload {
+  username: string;
+  password: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
+}
+
+export async function register(payload: RegisterPayload) {
+  const base = await getApiBase();
+  const { data } = await axios.post(`${base}/auth/register/`, payload);
+  await AsyncStorage.multiSet([[ACCESS, data.access], [REFRESH, data.refresh]]);
+  return data;
+}
+
 export async function logout() {
   await AsyncStorage.multiRemove([ACCESS, REFRESH]);
 }

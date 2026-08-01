@@ -41,6 +41,8 @@ export interface LabResult {
 
 export interface LabOrder {
   id: string;
+  patient_name: string;
+  patient_code: string;
   status: string;
   status_display: string;
   items: LabResult[];
@@ -50,6 +52,8 @@ export interface LabOrder {
 export interface Invoice {
   id: string;
   number: string;
+  patient_name: string;
+  patient_code: string;
   status: string;
   status_display: string;
   total: string;
@@ -70,8 +74,25 @@ export interface Appointment {
 export interface Drug {
   id: string;
   name: string;
+  unit: string;
+  price: string;
   stock_quantity: number;
+  reorder_level: number;
   stock_status: string;
+}
+
+export interface LabTest {
+  id: string;
+  name: string;
+  price: string;
+  sample_type: string;
+}
+
+export interface PrescriptionItem {
+  drug_name: string;
+  dosage: string;
+  frequency: string;
+  duration: string;
 }
 
 export interface Paginated<T> {

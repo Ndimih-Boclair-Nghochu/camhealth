@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentProps } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -71,6 +71,13 @@ export default function PatientDetail() {
           )}
         </Card>
 
+        <View style={styles.actionRow}>
+          <ActionBtn icon="document-text-outline" label="Consult" onPress={() => router.push(`/consultation/new?patient=${patient.id}`)} />
+          <ActionBtn icon="flask-outline" label="Lab" onPress={() => router.push("/laboratory")} />
+          <ActionBtn icon="receipt-outline" label="Invoice" onPress={() => router.push("/billing")} />
+          <ActionBtn icon="calendar-outline" label="Queue" onPress={() => router.push("/appointments")} />
+        </View>
+
         <Text style={styles.section}>Consultations</Text>
         {consultations.length === 0 ? (
           <Card><Empty icon="document-text-outline" text="No consultations yet." /></Card>
@@ -134,6 +141,15 @@ export default function PatientDetail() {
   );
 }
 
+function ActionBtn({ icon, label, onPress }: { icon: ComponentProps<typeof Ionicons>["name"]; label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.action, pressed && { opacity: 0.85 }]}>
+      <View style={styles.actionIcon}><Ionicons name={icon} size={20} color={colors.teal} /></View>
+      <Text style={styles.actionLabel}>{label}</Text>
+    </Pressable>
+  );
+}
+
 function Fact({ label, value, inline }: { label: string; value: string; inline?: boolean }) {
   if (inline) {
     return (
@@ -165,6 +181,10 @@ const styles = StyleSheet.create({
   factLabel: { fontSize: 12, color: colors.muted, marginTop: 3 },
   warnRow: { flexDirection: "row", alignItems: "center", gap: 7, marginTop: 12, backgroundColor: colors.warnBg, padding: 9, borderRadius: 10 },
   warnText: { color: colors.warn, fontSize: 13, flex: 1 },
+  actionRow: { flexDirection: "row", gap: 10, marginTop: 16 },
+  action: { flex: 1, backgroundColor: colors.card, borderRadius: radius.md, paddingVertical: 12, alignItems: "center", gap: 6 },
+  actionIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.okBg, alignItems: "center", justifyContent: "center" },
+  actionLabel: { fontSize: 12, color: colors.sub, fontWeight: "600" },
   section: { fontSize: 16, fontWeight: "800", color: colors.ink, marginTop: 22, marginBottom: 10 },
   cardHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   itemTitle: { fontSize: 15, fontWeight: "700", color: colors.ink },

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useEffect, useState, type ComponentProps } from "react";
 import {
   KeyboardAvoidingView, Platform, Pressable, ScrollView,
@@ -83,7 +83,10 @@ export default function Login() {
             <Text style={styles.ctaText}>{busy ? "Signing in…" : "Sign in"}</Text>
           </Pressable>
 
-          <Text style={styles.hint}>Demo: admin / camhealth123</Text>
+          <View style={styles.bottomRow}>
+            <Text style={{ color: colors.muted }}>New here? </Text>
+            <Link href="/register" replace><Text style={{ color: colors.teal, fontWeight: "700" }}>Create an account</Text></Link>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -125,4 +128,5 @@ const styles = StyleSheet.create({
   cta: { backgroundColor: colors.teal, height: 54, borderRadius: radius.md, alignItems: "center", justifyContent: "center", marginTop: 10, ...shadow.soft },
   ctaText: { color: "#fff", fontWeight: "800", fontSize: 16 },
   hint: { textAlign: "center", color: colors.muted, fontSize: 12, marginTop: 14 },
+  bottomRow: { flexDirection: "row", justifyContent: "center", marginTop: 18 },
 });

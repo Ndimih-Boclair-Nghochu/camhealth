@@ -1,6 +1,31 @@
 from rest_framework import serializers
 
-from .models import AuditLog, User
+from .models import AuditLog, Role, User
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    """Public self-registration. The first account a person creates is an
+    administrator of their own workspace, with full access to every service."""
+
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "phone", "email", "password", "role"]
+        extra_kwargs = {"role": {"required": False}}
+
+    def validate_username(self, value):
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("That username is already taken.")
+        return value
+
+    def create(self, validated_data):
+        password = validated_data.pop("password")
+        validated_data.setdefault("role", Role.ADMIN)
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
 
 
 class UserSerializer(serializers.ModelSerializer):
