@@ -5,8 +5,15 @@ from rest_framework.response import Response
 
 from common.api import AuditModelViewSet, write_audit
 
-from .models import Drug, StockMovement
-from .serializers import DrugSerializer, StockMovementSerializer
+from .models import Drug, Pharmacy, StockMovement
+from .serializers import DrugSerializer, PharmacySerializer, StockMovementSerializer
+
+
+class PharmacyViewSet(AuditModelViewSet):
+    queryset = Pharmacy.objects.all()
+    serializer_class = PharmacySerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["name", "city"]
 
 
 class DrugViewSet(AuditModelViewSet):

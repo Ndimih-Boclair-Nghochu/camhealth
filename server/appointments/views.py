@@ -1,11 +1,33 @@
 from django.utils import timezone
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from common.api import AuditModelViewSet
+from common.api import AuditModelViewSet, write_audit
+from common.permissions import IsStaffOrReadOnly
 
-from .models import Appointment
-from .serializers import AppointmentSerializer
+from .models import Appointment, AvailabilitySlot
+from .serializers import AppointmentSerializer, AvailabilitySlotSerializer
+
+
+class AvailabilitySlotViewSet(viewsets.ModelViewSet):
+    """Staff open the timetable; patients read the open slots to book."""
+
+    serializer_class = AvailabilitySlotSerializer
+    permission_classes = [IsStaffOrReadOnly]
+
+    def get_queryset(self):
+        from django.db.models import F
+
+        qs = AvailabilitySlot.objects.select_related("doctor").all()
+        if not getattr(self.request.user, "is_staff_member", False):
+            # Patients only see slots that are still open to book.
+            qs = qs.filter(active=True, starts_at__gt=timezone.now(), booked_count__lt=F("capacity"))
+        return qs
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        write_audit(self.request, "CREATE", instance)
 
 
 class AppointmentViewSet(AuditModelViewSet):

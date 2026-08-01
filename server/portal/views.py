@@ -4,7 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from appointments.models import Appointment
+from django.db.models import F
+
+from appointments.models import Appointment, AvailabilitySlot
 from appointments.serializers import AppointmentSerializer
 from billing.serializers import InvoiceSerializer
 from clinical.serializers import ConsultationSerializer, PrescriptionSerializer
@@ -15,6 +17,7 @@ from patients.serializers import PatientSerializer
 from pharmacy.models import Drug
 from pharmacy.serializers import DrugSerializer
 
+from .ai import symptom_reply
 from .models import DrugOrder, HospitalPost
 from .serializers import DrugOrderSerializer, HospitalPostSerializer
 
@@ -66,13 +69,30 @@ class MeAppointmentsView(APIView):
 
     def post(self, request):
         p = patient_profile(request)
+        slot_id = request.data.get("slot")
+        slot = None
+        scheduled_for = request.data.get("scheduled_for")
+
+        if slot_id:
+            slot = AvailabilitySlot.objects.filter(pk=slot_id).first()
+            if not slot or not slot.is_open:
+                return Response({"detail": "That time is no longer available."}, status=400)
+            scheduled_for = slot.starts_at
+
+        if not scheduled_for:
+            return Response({"detail": "Choose an available time."}, status=400)
+
         appt = Appointment.objects.create(
             patient=p,
-            scheduled_for=request.data.get("scheduled_for"),
+            scheduled_for=scheduled_for,
             reason=request.data.get("reason", ""),
             status=Appointment.Status.BOOKED,
+            doctor=slot.doctor if slot else None,
+            slot=slot,
             created_by=request.user,
         )
+        if slot:
+            AvailabilitySlot.objects.filter(pk=slot.pk).update(booked_count=F("booked_count") + 1)
         return Response(AppointmentSerializer(appt).data, status=201)
 
 
@@ -90,6 +110,25 @@ class HospitalPostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class SymptomCheckView(APIView):
+    """AI symptom triage (guidance, not diagnosis)."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        message = (request.data.get("message") or "").strip()
+        if not message:
+            return Response({"detail": "Describe your symptoms."}, status=400)
+        try:
+            reply = symptom_reply(message, request.data.get("history"))
+        except Exception:
+            return Response(
+                {"detail": "The assistant is unavailable right now. Please try again later."},
+                status=503,
+            )
+        return Response({"reply": reply})
 
 
 class ShopDrugsView(generics.ListAPIView):

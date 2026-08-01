@@ -6,6 +6,23 @@ from django.db import models
 from common.models import BaseModel
 
 
+class Pharmacy(BaseModel):
+    """A pharmacy branch a prescription can be routed to for collection."""
+
+    name = models.CharField(max_length=120)
+    address = models.CharField(max_length=200, blank=True)
+    city = models.CharField(max_length=80, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    active = models.BooleanField(default=True)
+
+    class Meta(BaseModel.Meta):
+        ordering = ["name"]
+        verbose_name_plural = "pharmacies"
+
+    def __str__(self):
+        return self.name
+
+
 class Drug(BaseModel):
     """A medicine in the pharmacy catalogue, with live stock."""
 

@@ -31,6 +31,15 @@ export default function Layout({ children }: { children: ReactNode }) {
           <NavLink to="/pharmacy" className="nav-item">
             <span>Pharmacy</span>
           </NavLink>
+          <NavLink to="/rx-queue" className="nav-item">
+            <span>Rx Prep Queue</span>
+          </NavLink>
+          <NavLink to="/pharmacies" className="nav-item">
+            <span>Pharmacy Branches</span>
+          </NavLink>
+          <NavLink to="/schedule" className="nav-item">
+            <span>Timetable</span>
+          </NavLink>
         </nav>
         <div className="sidebar-foot muted">Phase 1 · v1.0.0</div>
       </aside>

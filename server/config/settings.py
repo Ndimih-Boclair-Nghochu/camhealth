@@ -146,3 +146,7 @@ CORS_ALLOW_CREDENTIALS = True
 # ---- Cloud sync (used by `manage.py sync_to_cloud` on the on-site server) ----
 CLOUD_API_BASE = os.getenv("CLOUD_API_BASE", "")
 CLOUD_SYNC_TOKEN = os.getenv("CLOUD_SYNC_TOKEN", "")
+
+# ---- Groq AI (symptom checker) ----
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")

@@ -7,63 +7,93 @@ import { Button, Card, Empty, Loader, Pill } from "../../components/ui";
 import { TextField } from "../../components/kit";
 import { api } from "../../lib/api";
 import { colors, radius } from "../../lib/theme";
-import type { Appointment } from "../../lib/types";
-
-const SLOTS = ["Today", "Tomorrow", "In 3 days", "Next week"];
-function slotToDate(i: number) {
-  const d = new Date();
-  d.setDate(d.getDate() + [0, 1, 3, 7][i]);
-  d.setHours(9, 0, 0, 0);
-  return d;
-}
+import type { Appointment, AvailabilitySlot, Paginated } from "../../lib/types";
 
 const TONE: Record<string, "ok" | "warn" | "info" | "danger" | "neutral"> = {
   BOOKED: "info", WAITING: "warn", IN_CONSULTATION: "info", DONE: "ok", CANCELLED: "danger",
 };
 
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
+  if (d.toDateString() === today.toDateString()) return "Today";
+  if (d.toDateString() === tomorrow.toDateString()) return "Tomorrow";
+  return d.toLocaleDateString([], { weekday: "short", day: "numeric", month: "short" });
+}
+
 export default function Care() {
   const insets = useSafeAreaInsets();
   const [appts, setAppts] = useState<Appointment[] | null>(null);
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([]);
   const [reason, setReason] = useState("");
-  const [slot, setSlot] = useState(0);
+  const [selected, setSelected] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
 
   async function load() {
-    const { data } = await api.get<Appointment[]>("/me/appointments/");
-    setAppts(data);
+    const [a, s] = await Promise.all([
+      api.get<Appointment[]>("/me/appointments/"),
+      api.get<Paginated<AvailabilitySlot>>("/availability/"),
+    ]);
+    setAppts(a.data);
+    setSlots(s.data.results);
   }
   useEffect(() => { load(); }, []);
 
   async function book() {
-    setBusy(true);
+    if (!selected) { setMsg("Pick an available time first."); return; }
+    setMsg(""); setBusy(true);
     try {
-      await api.post("/me/appointments/", { scheduled_for: slotToDate(slot).toISOString(), reason });
-      setReason("");
+      await api.post("/me/appointments/", { slot: selected, reason });
+      setReason(""); setSelected(null);
       await load();
+    } catch (e: any) {
+      setMsg(e?.response?.data?.detail || "Could not book. Try another time.");
     } finally { setBusy(false); }
   }
+
+  // group slots by day
+  const grouped: Record<string, AvailabilitySlot[]> = {};
+  for (const s of slots) (grouped[dayLabel(s.starts_at)] ||= []).push(s);
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={[styles.header, { paddingTop: insets.top + 14 }]}>
         <Text style={styles.title}>Care</Text>
-        <Text style={styles.subtitle}>Book a consultation or video visit</Text>
+        <Text style={styles.subtitle}>Book from the hospital's available times</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 40 }}>
         <Card>
           <Text style={styles.cardTitle}>Request an appointment</Text>
           <TextField label="Reason" value={reason} onChangeText={setReason} placeholder="e.g. Fever, follow-up, antenatal" />
-          <Text style={styles.label}>Preferred time</Text>
-          <View style={styles.slots}>
-            {SLOTS.map((s, i) => (
-              <Pressable key={s} onPress={() => setSlot(i)} style={[styles.slot, slot === i && styles.slotOn]}>
-                <Text style={[styles.slotText, slot === i && styles.slotTextOn]}>{s}</Text>
-              </Pressable>
-            ))}
-          </View>
+
+          <Text style={styles.label}>Available times</Text>
+          {slots.length === 0 ? (
+            <Text style={styles.none}>No open slots right now. Please check back later.</Text>
+          ) : (
+            Object.entries(grouped).map(([day, list]) => (
+              <View key={day} style={{ marginBottom: 10 }}>
+                <Text style={styles.day}>{day}</Text>
+                <View style={styles.slotWrap}>
+                  {list.map((s) => {
+                    const on = selected === s.id;
+                    return (
+                      <Pressable key={s.id} onPress={() => setSelected(s.id)} style={[styles.slot, on && styles.slotOn]}>
+                        <Text style={[styles.slotText, on && styles.slotTextOn]}>
+                          {new Date(s.starts_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              </View>
+            ))
+          )}
+
+          {!!msg && <Text style={styles.err}>{msg}</Text>}
           <Button label="Book appointment" icon="calendar-outline" onPress={book} loading={busy} />
-          <Text style={styles.hint}>The hospital confirms your slot and notifies you.</Text>
         </Card>
 
         <Text style={styles.section}>My appointments</Text>
@@ -75,12 +105,12 @@ export default function Care() {
           appts.map((a) => (
             <Card key={a.id} style={styles.apptRow}>
               <View style={styles.dateBox}>
-                <Text style={styles.day}>{new Date(a.scheduled_for).getDate()}</Text>
-                <Text style={styles.mon}>{new Date(a.scheduled_for).toLocaleString("en", { month: "short" })}</Text>
+                <Text style={styles.dnum}>{new Date(a.scheduled_for).getDate()}</Text>
+                <Text style={styles.dmon}>{new Date(a.scheduled_for).toLocaleString("en", { month: "short" })}</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.reason}>{a.reason || "Appointment"}</Text>
-                <Text style={styles.time}>{new Date(a.scheduled_for).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })}</Text>
+                <Text style={styles.aReason}>{a.reason || "Appointment"}</Text>
+                <Text style={styles.aTime}>{new Date(a.scheduled_for).toLocaleString([], { weekday: "short", hour: "2-digit", minute: "2-digit" })}</Text>
               </View>
               <Pill label={a.status_display} tone={TONE[a.status] || "neutral"} />
             </Card>
@@ -96,18 +126,20 @@ const styles = StyleSheet.create({
   title: { color: "#fff", fontSize: 24, fontWeight: "800" },
   subtitle: { color: "#9fb4c9", fontSize: 13, marginTop: 4 },
   cardTitle: { fontSize: 16, fontWeight: "800", color: colors.ink, marginBottom: 12 },
-  label: { fontSize: 12, color: colors.muted, marginBottom: 6 },
-  slots: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginBottom: 14 },
-  slot: { borderWidth: 1.4, borderColor: colors.line, borderRadius: radius.pill, paddingVertical: 9, paddingHorizontal: 15, backgroundColor: colors.card },
+  label: { fontSize: 12, color: colors.muted, marginBottom: 6, marginTop: 4 },
+  none: { color: colors.muted, fontSize: 13, marginBottom: 12 },
+  day: { fontSize: 12.5, fontWeight: "800", color: colors.navy2, marginBottom: 6 },
+  slotWrap: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  slot: { borderWidth: 1.4, borderColor: colors.line, borderRadius: radius.sm, paddingVertical: 9, paddingHorizontal: 14, backgroundColor: colors.card },
   slotOn: { backgroundColor: colors.teal, borderColor: colors.teal },
-  slotText: { color: colors.sub, fontWeight: "600", fontSize: 13 },
+  slotText: { color: colors.sub, fontWeight: "700", fontSize: 13 },
   slotTextOn: { color: "#fff" },
-  hint: { color: colors.muted, fontSize: 12, marginTop: 10, textAlign: "center" },
+  err: { color: colors.danger, fontSize: 13, marginVertical: 8 },
   section: { fontSize: 16, fontWeight: "800", color: colors.ink, marginTop: 22, marginBottom: 10 },
   apptRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 10 },
   dateBox: { width: 50, height: 50, borderRadius: 13, backgroundColor: "#eef2f6", alignItems: "center", justifyContent: "center" },
-  day: { fontSize: 18, fontWeight: "800", color: colors.navy },
-  mon: { fontSize: 10.5, color: colors.muted, textTransform: "uppercase" },
-  reason: { fontSize: 15, fontWeight: "700", color: colors.ink },
-  time: { fontSize: 12.5, color: colors.muted, marginTop: 2 },
+  dnum: { fontSize: 18, fontWeight: "800", color: colors.navy },
+  dmon: { fontSize: 10.5, color: colors.muted, textTransform: "uppercase" },
+  aReason: { fontSize: 15, fontWeight: "700", color: colors.ink },
+  aTime: { fontSize: 12.5, color: colors.muted, marginTop: 2 },
 });

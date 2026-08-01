@@ -51,6 +51,20 @@ class Prescription(BaseModel):
         on_delete=models.SET_NULL, related_name="prescriptions",
     )
     notes = models.TextField(blank=True)
+
+    class Fulfilment(models.TextChoices):
+        PENDING = "PENDING", "Awaiting preparation"
+        READY = "READY", "Ready for collection"
+        COLLECTED = "COLLECTED", "Collected"
+
+    # Which pharmacy the patient should collect from, and its preparation status.
+    pharmacy = models.ForeignKey(
+        "pharmacy.Pharmacy", null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="prescriptions",
+    )
+    fulfilment_status = models.CharField(
+        max_length=10, choices=Fulfilment.choices, default=Fulfilment.PENDING
+    )
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True,
         on_delete=models.SET_NULL, related_name="created_prescriptions",

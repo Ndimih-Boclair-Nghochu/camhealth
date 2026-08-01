@@ -10,6 +10,7 @@ import {
   type LabOrder,
   type LabTest,
   type Paginated,
+  type Pharmacy,
   type Patient,
   type PrescriptionItem,
 } from "@camhealth/shared";
@@ -204,7 +205,13 @@ function ConsultationPanel({
     notes: "",
   });
   const [rx, setRx] = useState<PrescriptionItem[]>([]);
+  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
+  const [pharmacyId, setPharmacyId] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    api.get<Paginated<Pharmacy>>("/pharmacies/").then((r) => setPharmacies(r.data.results));
+  }, []);
 
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setF({ ...f, [k]: e.target.value });
@@ -232,9 +239,11 @@ function ConsultationPanel({
           patient: patientId,
           consultation: consult.id,
           notes: "",
+          pharmacy: pharmacyId || null,
           items: drugs,
         });
       }
+      setPharmacyId("");
       setF({ complaint: "", diagnosis: "", temperature: "", blood_pressure: "", pulse: "", weight: "", notes: "" });
       setRx([]);
       setOpen(false);
@@ -287,6 +296,20 @@ function ConsultationPanel({
                 + Add drug
               </button>
             </div>
+            {rx.length > 0 && (
+              <div style={{ marginBottom: 8 }}>
+                <label>Collect at pharmacy</label>
+                <select value={pharmacyId} onChange={(e) => setPharmacyId(e.target.value)}>
+                  <option value="">— Select a pharmacy —</option>
+                  {pharmacies.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                      {p.city ? ` (${p.city})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
             {rx.map((d, i) => (
               <div className="rx-row" key={i}>
                 <input placeholder="Drug" value={d.drug_name} onChange={(e) => setDrug(i, "drug_name", e.target.value)} />

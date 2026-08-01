@@ -4,16 +4,17 @@ Parents come before their children so that when a push is applied, foreign-key
 targets already exist. Every model listed here has a ``updated_at`` field used
 for change detection.
 """
-from appointments.models import Appointment
+from appointments.models import Appointment, AvailabilitySlot
 from billing.models import Invoice, InvoiceItem, Payment
 from clinical.models import Consultation, Prescription, PrescriptionItem
 from lab.models import LabOrder, LabResult, LabTest
 from patients.models import Patient
-from pharmacy.models import Drug, StockMovement
+from pharmacy.models import Drug, Pharmacy, StockMovement
 from portal.models import DrugOrder, DrugOrderItem, HospitalPost
 
 SYNCABLE = [
     ("patients.patient", Patient),
+    ("pharmacy.pharmacy", Pharmacy),
     ("clinical.consultation", Consultation),
     ("clinical.prescription", Prescription),
     ("clinical.prescriptionitem", PrescriptionItem),
@@ -22,6 +23,7 @@ SYNCABLE = [
     ("billing.payment", Payment),
     ("pharmacy.drug", Drug),
     ("pharmacy.stockmovement", StockMovement),
+    ("appointments.availabilityslot", AvailabilitySlot),
     ("appointments.appointment", Appointment),
     ("lab.labtest", LabTest),
     ("lab.laborder", LabOrder),

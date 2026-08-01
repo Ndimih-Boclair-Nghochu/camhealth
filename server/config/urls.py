@@ -16,8 +16,9 @@ def api_root(_request):
                 "drugs/", "drugs/alerts/", "stock-movements/",
                 "appointments/", "appointments/queue/",
                 "lab-tests/", "lab-orders/", "lab-orders/pending/",
+                "pharmacies/", "availability/", "prescriptions/queue/",
                 "me/profile/", "me/records/", "me/appointments/",
-                "posts/", "shop/drugs/", "orders/",
+                "posts/", "shop/drugs/", "orders/", "symptom-check/",
                 "sync/pull/", "sync/push/",
             ],
         }

@@ -12,10 +12,14 @@ export interface User {
 export interface Patient {
   id: string;
   patient_code: string;
+  first_name: string;
+  last_name: string;
   full_name: string;
   sex: string;
+  date_of_birth: string | null;
   age: number | null;
   phone: string;
+  address: string;
   blood_group: string;
   allergies: string;
   chronic_conditions: string;
@@ -99,7 +103,22 @@ export interface Prescription {
   id: string;
   notes: string;
   items: PrescriptionItem[];
+  pharmacy_name: string;
+  pharmacy_address: string;
+  pharmacy_phone: string;
+  fulfilment_status: string;
+  fulfilment_display: string;
   created_at: string;
+}
+
+export interface AvailabilitySlot {
+  id: string;
+  starts_at: string;
+  duration_minutes: number;
+  capacity: number;
+  booked_count: number;
+  doctor_name: string;
+  is_open: boolean;
 }
 
 export interface HospitalPost {

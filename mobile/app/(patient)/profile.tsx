@@ -1,40 +1,50 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Avatar, Card } from "../../components/ui";
-import { getOrigin } from "../../lib/api";
+import { api } from "../../lib/api";
 import { useAuth } from "../../lib/auth";
 import { colors, radius, shadow } from "../../lib/theme";
-
-const MENU: { icon: keyof typeof Ionicons.glyphMap; label: string; note: string }[] = [
-  { icon: "people-outline", label: "Family & dependents", note: "Manage children and relatives" },
-  { icon: "card-outline", label: "Payments & wallet", note: "Mobile Money, receipts" },
-  { icon: "notifications-outline", label: "Reminders", note: "Medication & appointment alerts" },
-  { icon: "call-outline", label: "Emergency & ambulance", note: "Quick help when it matters" },
-];
+import type { Patient } from "../../lib/types";
 
 export default function PatientProfile() {
   const { user, signOut } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [origin, setOrigin] = useState("");
+  const [profile, setProfile] = useState<Patient | null>(null);
 
-  useEffect(() => { getOrigin().then(setOrigin); }, []);
+  async function load() {
+    try {
+      const { data } = await api.get<Patient>("/me/profile/");
+      setProfile(data);
+    } catch { /* ignore */ }
+  }
+  useEffect(() => { load(); }, []);
 
   async function handleSignOut() {
     await signOut();
     router.replace("/login");
   }
 
+  const MENU: { icon: keyof typeof Ionicons.glyphMap; label: string; note: string; onPress: () => void }[] = [
+    { icon: "create-outline", label: "Edit profile", note: "Name, contact, health details", onPress: () => router.push("/(patient)/edit-profile") },
+    { icon: "calendar-outline", label: "My appointments", note: "Upcoming and past visits", onPress: () => router.push("/(patient)/care") },
+    { icon: "bag-handle-outline", label: "My pharmacy orders", note: "Track medicine orders", onPress: () => router.push("/(patient)/pharmacy") },
+    { icon: "sparkles-outline", label: "Symptom checker", note: "Get quick AI guidance", onPress: () => router.push("/(patient)/symptom") },
+    { icon: "help-circle-outline", label: "Help & support", note: "Contact the CamHealth team", onPress: () => Linking.openURL("mailto:ndimihboclair4@gmail.com?subject=CamHealth%20support") },
+  ];
+
+  const name = profile ? profile.full_name : user?.full_name || user?.username;
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
-        <Avatar name={user?.full_name || "?"} size={72} color={colors.tealBright} />
-        <Text style={styles.name}>{user?.full_name || user?.username}</Text>
-        <Text style={styles.role}>Patient account</Text>
+        <Avatar name={name || "?"} size={72} color={colors.tealBright} />
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.role}>{profile ? profile.patient_code : "Patient account"}</Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} style={{ marginTop: -22 }}>
@@ -44,13 +54,18 @@ export default function PatientProfile() {
             <Text style={styles.memberTitle}>CamHealth+ Membership</Text>
           </View>
           <Text style={styles.memberDesc}>Priority booking, free delivery, discounts on consultations and medicines.</Text>
-          <Pressable style={styles.memberBtn}><Text style={styles.memberBtnText}>Upgrade — 2,000 FCFA/mo</Text></Pressable>
+          <Pressable
+            style={styles.memberBtn}
+            onPress={() => Alert.alert("CamHealth+", "Membership launches soon — you'll get priority booking, free medicine delivery and discounts for 2,000 FCFA/month.")}
+          >
+            <Text style={styles.memberBtnText}>Upgrade — 2,000 FCFA/mo</Text>
+          </Pressable>
         </Card>
 
         <Card style={{ padding: 6 }}>
           {MENU.map((m, i) => (
             <View key={m.label}>
-              <Pressable style={styles.menuRow}>
+              <Pressable style={styles.menuRow} onPress={m.onPress}>
                 <View style={styles.menuIcon}><Ionicons name={m.icon} size={18} color={colors.teal} /></View>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.menuLabel}>{m.label}</Text>
@@ -67,7 +82,7 @@ export default function PatientProfile() {
           <Ionicons name="log-out-outline" size={19} color={colors.danger} />
           <Text style={styles.signoutText}>Sign out</Text>
         </Pressable>
-        <Text style={styles.footer}>CamHealth · v1.0.0 · {origin}</Text>
+        <Text style={styles.footer}>CamHealth · v1.0.0 · by NBN TECH</Text>
       </ScrollView>
     </View>
   );

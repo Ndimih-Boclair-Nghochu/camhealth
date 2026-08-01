@@ -1,6 +1,12 @@
 from rest_framework import serializers
 
-from .models import Drug, StockMovement
+from .models import Drug, Pharmacy, StockMovement
+
+
+class PharmacySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pharmacy
+        fields = ["id", "name", "address", "city", "phone", "active", "created_at"]
 
 
 class DrugSerializer(serializers.ModelSerializer):

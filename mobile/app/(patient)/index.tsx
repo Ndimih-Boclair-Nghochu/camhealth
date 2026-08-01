@@ -14,7 +14,7 @@ const QUICK = [
   { label: "Book visit", icon: "calendar", tint: "#3b82f6", href: "/(patient)/care" },
   { label: "Pharmacy", icon: "cart", tint: "#e0803a", href: "/(patient)/pharmacy" },
   { label: "My records", icon: "folder-open", tint: "#1d6f6b", href: "/(patient)/records" },
-  { label: "Symptom check", icon: "pulse", tint: "#8b5cf6", href: "/(patient)/care" },
+  { label: "Symptom check", icon: "pulse", tint: "#8b5cf6", href: "/(patient)/symptom" },
 ] as const;
 
 const CAT_TONE: Record<string, string> = { ALERT: colors.danger, CAMPAIGN: "#8b5cf6", TIP: colors.ok, NEWS: colors.teal };

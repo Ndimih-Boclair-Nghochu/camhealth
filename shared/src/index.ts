@@ -157,7 +157,33 @@ export interface Prescription {
   prescriber: string | null;
   notes: string;
   items: PrescriptionItem[];
+  pharmacy: string | null;
+  pharmacy_name: string;
+  pharmacy_address: string;
+  fulfilment_status: string;
+  fulfilment_display: string;
   created_at: string;
+}
+
+export interface Pharmacy {
+  id: string;
+  name: string;
+  address: string;
+  city: string;
+  phone: string;
+  active: boolean;
+  created_at: string;
+}
+
+export interface AvailabilitySlot {
+  id: string;
+  starts_at: string;
+  duration_minutes: number;
+  capacity: number;
+  booked_count: number;
+  doctor_name: string;
+  is_open: boolean;
+  active: boolean;
 }
 
 export interface InvoiceItem {
@@ -298,6 +324,9 @@ export const API = {
   stockMovements: "/stock-movements/",
   appointments: "/appointments/",
   appointmentQueue: "/appointments/queue/",
+  availability: "/availability/",
+  pharmacies: "/pharmacies/",
+  prescriptionQueue: "/prescriptions/queue/",
   labTests: "/lab-tests/",
   labOrders: "/lab-orders/",
   labOrdersPending: "/lab-orders/pending/",

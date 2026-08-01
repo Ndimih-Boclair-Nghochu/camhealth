@@ -1,4 +1,6 @@
 from rest_framework import filters
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from common.api import AuditModelViewSet
 
@@ -39,8 +41,11 @@ class PrescriptionViewSet(AuditModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
         patient = self.request.query_params.get("patient")
+        pharmacy = self.request.query_params.get("pharmacy")
         if patient:
             qs = qs.filter(patient_id=patient)
+        if pharmacy:
+            qs = qs.filter(pharmacy_id=pharmacy)
         return qs
 
     def perform_create(self, serializer):
@@ -50,3 +55,11 @@ class PrescriptionViewSet(AuditModelViewSet):
         instance = serializer.save(**extra)
         from common.api import write_audit
         write_audit(self.request, "CREATE", instance)
+
+    @action(detail=False, methods=["get"])
+    def queue(self, request):
+        """Pharmacist work list: prescriptions to prepare / hand over."""
+        qs = self.get_queryset().filter(
+            fulfilment_status__in=[Prescription.Fulfilment.PENDING, Prescription.Fulfilment.READY]
+        ).order_by("created_at")
+        return Response(PrescriptionSerializer(qs, many=True).data)

@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Card, Empty, Loader, Pill } from "../../components/ui";
 import { api, money } from "../../lib/api";
-import { colors } from "../../lib/theme";
+import { colors, radius } from "../../lib/theme";
 import type { RecordsBundle } from "../../lib/types";
 
 export default function Records() {
@@ -56,6 +56,19 @@ export default function Records() {
                 {p.items.map((it, i) => (
                   <Text key={i} style={styles.rx}>• {it.drug_name} {it.dosage} {it.frequency ? `— ${it.frequency}` : ""}</Text>
                 ))}
+                {!!p.pharmacy_name && (
+                  <View style={styles.collect}>
+                    <Ionicons name="location" size={16} color={colors.teal} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.collectName}>Collect at {p.pharmacy_name}</Text>
+                      {!!p.pharmacy_address && <Text style={styles.collectAddr}>{p.pharmacy_address}</Text>}
+                    </View>
+                    <Pill
+                      label={p.fulfilment_display}
+                      tone={p.fulfilment_status === "READY" ? "ok" : p.fulfilment_status === "COLLECTED" ? "neutral" : "warn"}
+                    />
+                  </View>
+                )}
               </Card>
             ))
           )}
@@ -120,6 +133,9 @@ const styles = StyleSheet.create({
   itemSub: { fontSize: 13, color: colors.sub, marginTop: 3 },
   date: { fontSize: 12, color: colors.muted, marginTop: 4 },
   rx: { fontSize: 13.5, color: colors.ink, marginTop: 5 },
+  collect: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 10, backgroundColor: colors.okBg, padding: 10, borderRadius: radius.sm },
+  collectName: { fontSize: 13.5, fontWeight: "700", color: colors.ink },
+  collectAddr: { fontSize: 12, color: colors.sub, marginTop: 1 },
   cardHead: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   labLine: { flexDirection: "row", justifyContent: "space-between", marginTop: 8 },
   labName: { fontSize: 14, color: colors.ink, fontWeight: "600" },

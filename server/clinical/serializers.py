@@ -34,12 +34,18 @@ class PrescriptionSerializer(serializers.ModelSerializer):
     items = PrescriptionItemSerializer(many=True)
     patient_name = serializers.CharField(source="patient.full_name", read_only=True)
     patient_code = serializers.CharField(source="patient.patient_code", read_only=True)
+    pharmacy_name = serializers.CharField(source="pharmacy.name", read_only=True)
+    pharmacy_address = serializers.CharField(source="pharmacy.address", read_only=True)
+    pharmacy_phone = serializers.CharField(source="pharmacy.phone", read_only=True)
+    fulfilment_display = serializers.CharField(source="get_fulfilment_status_display", read_only=True)
 
     class Meta:
         model = Prescription
         fields = [
             "id", "consultation", "patient", "patient_name", "patient_code",
-            "prescriber", "notes", "items", "created_at",
+            "prescriber", "notes", "items", "pharmacy", "pharmacy_name",
+            "pharmacy_address", "pharmacy_phone", "fulfilment_status",
+            "fulfilment_display", "created_at",
         ]
 
     def create(self, validated_data):
