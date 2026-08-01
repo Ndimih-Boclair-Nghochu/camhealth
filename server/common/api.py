@@ -6,6 +6,8 @@ both a security control and the "staff accountability" feature CamHealth promise
 """
 from rest_framework import viewsets
 
+from .permissions import IsStaff
+
 
 def client_ip(request):
     forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
@@ -29,7 +31,13 @@ def write_audit(request, action, instance, description=""):
 
 
 class AuditModelViewSet(viewsets.ModelViewSet):
-    """ModelViewSet that stamps ``created_by`` and records an audit log entry."""
+    """ModelViewSet that stamps ``created_by`` and records an audit log entry.
+
+    All clinical/operational endpoints are staff-only; patients use the
+    dedicated portal endpoints instead.
+    """
+
+    permission_classes = [IsStaff]
 
     def perform_create(self, serializer):
         kwargs = {}

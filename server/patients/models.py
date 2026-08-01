@@ -27,6 +27,11 @@ class Patient(BaseModel):
         settings.AUTH_USER_MODEL, null=True, blank=True,
         on_delete=models.SET_NULL, related_name="registered_patients",
     )
+    # Set when the patient is a self-service app user (links their login to their file).
+    account = models.OneToOneField(
+        settings.AUTH_USER_MODEL, null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="patient_profile",
+    )
 
     class Meta(BaseModel.Meta):
         indexes = [models.Index(fields=["last_name", "first_name"])]

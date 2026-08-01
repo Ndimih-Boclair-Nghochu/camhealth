@@ -10,6 +10,7 @@ from clinical.models import Consultation, Prescription, PrescriptionItem
 from lab.models import LabOrder, LabResult, LabTest
 from patients.models import Patient
 from pharmacy.models import Drug, StockMovement
+from portal.models import DrugOrder, DrugOrderItem, HospitalPost
 
 SYNCABLE = [
     ("patients.patient", Patient),
@@ -25,6 +26,9 @@ SYNCABLE = [
     ("lab.labtest", LabTest),
     ("lab.laborder", LabOrder),
     ("lab.labresult", LabResult),
+    ("portal.hospitalpost", HospitalPost),
+    ("portal.drugorder", DrugOrder),
+    ("portal.drugorderitem", DrugOrderItem),
 ]
 
 LABEL_TO_MODEL = {label: model for label, model in SYNCABLE}

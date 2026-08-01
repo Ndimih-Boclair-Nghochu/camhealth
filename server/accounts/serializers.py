@@ -4,15 +4,18 @@ from .models import AuditLog, Role, User
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    """Public self-registration. The first account a person creates is an
-    administrator of their own workspace, with full access to every service."""
+    """Public self-registration. A self-registered person is a PATIENT: a health
+    profile is created and linked to their login so they can manage their own
+    care (records, appointments, pharmacy). Staff accounts are created inside the
+    system by an administrator, not here."""
 
     password = serializers.CharField(write_only=True, min_length=6)
+    sex = serializers.ChoiceField(choices=["M", "F", "O"], required=False, write_only=True)
+    date_of_birth = serializers.DateField(required=False, allow_null=True, write_only=True)
 
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "phone", "email", "password", "role"]
-        extra_kwargs = {"role": {"required": False}}
+        fields = ["id", "username", "first_name", "last_name", "phone", "email", "password", "sex", "date_of_birth"]
 
     def validate_username(self, value):
         if User.objects.filter(username__iexact=value).exists():
@@ -20,11 +23,25 @@ class RegisterSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        from patients.models import Patient
+
         password = validated_data.pop("password")
-        validated_data.setdefault("role", Role.ADMIN)
-        user = User(**validated_data)
+        sex = validated_data.pop("sex", "O")
+        dob = validated_data.pop("date_of_birth", None)
+
+        user = User(role=Role.PATIENT, **validated_data)
         user.set_password(password)
         user.save()
+
+        Patient.objects.create(
+            account=user,
+            first_name=user.first_name or user.username,
+            last_name=user.last_name or "",
+            sex=sex,
+            date_of_birth=dob,
+            phone=user.phone,
+            created_by=user,
+        )
         return user
 
 

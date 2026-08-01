@@ -11,6 +11,13 @@ class Role(models.TextChoices):
     RECEPTIONIST = "RECEPTIONIST", "Receptionist"
     CASHIER = "CASHIER", "Cashier"
     PHARMACIST = "PHARMACIST", "Pharmacist"
+    PATIENT = "PATIENT", "Patient"
+
+
+# Roles that belong to hospital staff (everything except a self-service patient).
+STAFF_ROLES = [
+    Role.ADMIN, Role.DOCTOR, Role.NURSE, Role.RECEPTIONIST, Role.CASHIER, Role.PHARMACIST,
+]
 
 
 class User(AbstractUser):
@@ -19,6 +26,10 @@ class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.RECEPTIONIST)
     phone = models.CharField(max_length=20, blank=True)
+
+    @property
+    def is_staff_member(self):
+        return self.is_superuser or self.role in STAFF_ROLES
 
     def __str__(self):
         return f"{self.get_full_name() or self.username} ({self.get_role_display()})"

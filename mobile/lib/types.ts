@@ -95,6 +95,58 @@ export interface PrescriptionItem {
   duration: string;
 }
 
+export interface Prescription {
+  id: string;
+  notes: string;
+  items: PrescriptionItem[];
+  created_at: string;
+}
+
+export interface HospitalPost {
+  id: string;
+  title: string;
+  body: string;
+  category: string;
+  category_display: string;
+  image_url: string;
+  author_name: string;
+  created_at: string;
+}
+
+export interface CartItem {
+  drug: Drug;
+  quantity: number;
+}
+
+export interface DrugOrderItem {
+  id?: string;
+  drug?: string | null;
+  drug_name: string;
+  unit_price: string;
+  quantity: number;
+  amount?: string;
+}
+
+export interface DrugOrder {
+  id: string;
+  status: string;
+  status_display: string;
+  fulfilment: string;
+  payment_method: string;
+  items: DrugOrderItem[];
+  total: string;
+  item_count: number;
+  created_at: string;
+}
+
+export interface RecordsBundle {
+  patient: Patient;
+  consultations: Consultation[];
+  prescriptions: Prescription[];
+  lab_orders: LabOrder[];
+  invoices: Invoice[];
+}
+
 export interface Paginated<T> {
   count: number;
   results: T[];

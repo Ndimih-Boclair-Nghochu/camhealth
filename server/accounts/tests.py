@@ -14,8 +14,11 @@ class RegistrationTests(APITestCase):
         body = res.json()
         self.assertIn("access", body)
         self.assertIn("refresh", body)
-        self.assertEqual(body["user"]["role"], "ADMIN")
-        self.assertTrue(User.objects.filter(username="drmbah").exists())
+        self.assertEqual(body["user"]["role"], "PATIENT")
+        user = User.objects.get(username="drmbah")
+        # A linked health profile is auto-created for self-registered patients.
+        self.assertTrue(hasattr(user, "patient_profile"))
+        self.assertEqual(user.patient_profile.first_name, "Paul")
 
     def test_new_account_can_use_its_token(self):
         access = self.client.post(
